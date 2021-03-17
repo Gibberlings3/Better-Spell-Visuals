@@ -1,0 +1,36 @@
+BACKUP ~bubb_mirror_image_transparency/backup~
+AUTHOR ~Bubb~
+VERSION 1.0
+
+BEGIN ~Bubb's v2.5.16.6+ Mirror Image Transparency~
+REQUIRE_PREDICATE (GAME_IS ~bgee bg2ee eet iwdee~) ~Game not supported.~
+
+	ACTION_IF GAME_IS ~bgee bg2ee eet~ BEGIN
+		OUTER_SPRINT exe_name ~Baldur.exe~
+	END ELSE ACTION_IF GAME_IS ~iwdee~ BEGIN
+		OUTER_SPRINT exe_name ~icewind.exe~
+	END ELSE BEGIN
+		FAIL ~exe_name not defined for game; (logic error, report to @Bubb).~
+	END
+
+	OUTER_SET acceptable_input = 0
+	OUTER_WHILE acceptable_input == 0 BEGIN
+		PRINT ~Please enter how transparent you wish mirror images to be (as a percent):~
+		ACTION_READLN response
+		ACTION_IF IS_AN_INT ~%response%~ BEGIN
+			OUTER_SET acceptable_input = response >= 0 AND response <= 100
+		END
+	END
+	OUTER_SET transparency_byte = 255 * response / 100
+
+	COPY ~%exe_name%~ ~%exe_name%~
+
+		mirror_image_transparency = INDEX_BUFFER (EXACT_MATCH ~j`ÿw~)
+
+		PATCH_IF mirror_image_transparency == (0 - 1) BEGIN
+			PATCH_FAIL ~Couldn't find mirror_image_transparency; most likely you are trying to install on a future version.~
+		END
+
+		WRITE_BYTE mirror_image_transparency + 1 transparency_byte
+
+	IF_EXISTS

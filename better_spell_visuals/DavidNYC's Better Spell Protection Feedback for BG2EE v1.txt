@@ -1,0 +1,400 @@
+
+
+
+Component 1: 'Make Magical Protections More Distinct and Recognizable'
+
+    PfNW
+    PfMW
+    Prismatic Mantle
+    Moment of Prescience
+    Absolute Immunity
+    ProMissiles
+    NonDetection
+    Deflections/Trap/SotA
+    Dispelling Screen
+    MGOI/GOI
+    Fire Shield/Acid Sheath
+    Spell Shield
+    Storm Shield
+    Mind Blank
+    Disable Ioun Stone animations so as not to conflict with these
+
+Probably set all these animations in a single go. (NB there is a bit of a conflict between SR's "Storm Shield" and SCS/IWD's "Storm Shell." Both can coexist, but it seems like they should be collapsed into one spell. I will probably handle this separately in my own mod, though.)
+
+I know you have this geared toward SR+SCS, but at least some of these could be independent. I'll think about how much effort it's worth to support non-SR games.
+
+Component 2: 'Varying Color Glows & Pulses'
+
+I see what you're doing here, but I'm not sure how extensive this needs to be. I might leave it aside until I have wrapped my head around the extent of it.
+
+Component 3: 'Bubb's Mirror Image Transparancy'
+
+EEex-only, so broken out into its own component so players without EEex don't need to worry about it. In an effort to avoid using READLN, I would probably just offer a couple optional SUBCOMPONENTs, with 51% transparency and 80% transparency, or something like that.
+
+Component 4: 'DavidNYC's Functional Tweaks'
+
+Nondetection:
+
+    Prevent Nondetection from stacking
+    Nondetection add 206 vs. True Sight, Detect Illusion, and Faerie Fire
+    Set power level of Nondetection so it can be removed by MAGICATTACKs
+    Make Nondetection dispellable
+    Set MSD spellstates for Nondetection
+
+Dispelling Screen
+
+    Set Dispelling Screen to SPELLPROTECTIONS sectype
+    Set Breach/Dispel Magic to 321 remove Dispelling Screen
+    Fix dispel-on-hit items to work with this version
+
+Fire Shield/Acxid Sheath:
+
+    Set to SPECIFICPROTECTIONS sectype
+
+
+
+DavidNYC's Better Spell Protection Feedback for BG2EE v1 (March 2021)
+-----------------------------------------------------------------------
+
+
+Everyone has permission to use these files and animations. If you publish a Baldur's Gate mod which incorporates them, please give me a credit for posterity's sake.
+
+
+
+
+//===========================================================================================
+
+
+1. The following assumes SCS + Spell Revisions (v4 Beta 16) + Item Revisions (v4 Beta 10)
+
+
+2. In some cases SR or SCS already applies a spell animation and I'm replacing it with a more transparent, toned-down animation that is less overwhelming among multiple protections. In other cases I'm applying an animation to a spell that doesn't have one.
+
+
+e.g. Spell Shield is spwi519.spl. It aleady has an animation in DW#W519A.spl, which I replace. You won't have DW#W519A.spl unless you've installed SCS.
+
+e.g. pfMW is spwi611.spl and does NOT have an animation, so you can add it directly in spwi611.spl. But this animation won't turn invisible when the mage goes invisible. You'll have to incorporate SCS' animation invisibility code to generate dw#w611a.spl, dw#w611b.spl, dw#w611a.eff, dw#w611b.eff, etc.
+
+For simplicity I'm ignoring the animation invisibilty issue here. I have it all working based off SCS's method, but be aware there are a few tweaks to certain invisibility spells, and detection spells, to get it working 100%.
+
+
+3. I have Weidu functions that are very near copies of their original. If you see something like DK_DELETE_EFFECT, it's my tweaked version of DELETE_EFFECT. There are a couple of things my functions do that the original cannot, but I suspect they don't come up in these snippets. Fyi, I've pulled and edited these snippets from my code without checking them independently.
+
+If trying to use my DK_CLONE_EFFECT as is below, just add the following RET variable to your DEFINE_PATCH_FUNCTION CLONE_EFFECT:
+
+ 	  // new_fx is # of new effects added. This variable already exists in the function.
+   RET new_fx    
+
+
+4. Varying Color Glows & Pulses as an additional spell 'animation'. This is a completely separate topic from SPELLPROTECTIONS animations. I currently use a pulsing purple glow on Silenced targets, and a pulsing white/blue glow on Blinded targets. See 'Varying Color Glows & Pulses' below.
+
+
+
+
+//===========================================================================================
+
+3D Animations General:
+
+BAM's replaced with blank BAM's: spturni2.bam, spmagglo.bam, spshield.bam.
+These blanks are included in the files
+
+
+
+// Combat Protections
+//---------------------------------------------
+
+Protection from Normal Weapons (overhead grey bulb)
+	SPWI511
+	dwsw511	(SCS's pfNW pre-buff)
+	potn11	(potion invulnerability)
+	spwi315	(wraithform)
+	Animation1=~myBulbGr.vvc~ ~myBulbGr.bam~
+
+Protection from Magic Weapons	(overhead bright purple bulb)
+	spwi611
+	dwsw611
+	Animation1=~SPCOMETT.vvc~ ~SPCOMETT.bam~
+
+Prismatic Mantle (more transparent version of SR's gold sparkle cage)
+ spwi708
+ overwrite dvmantle.bam with my more transparent version (spell already applies dvmantle.vvc)
+ *SCS already handles invisibilty animation for dvmantle.vvc
+
+Improved Mantle	(overhead sparking anim)
+	*** SR calls this Moment of Prescience, I change it back to the original name ***
+	SPWI808
+	Animation1=~myImpMan.vvc~ ~myImpMan.bam~
+	// remove existing 3d effect
+ 	LPF DK_DELETE_EFFECT INT_VAR match_opcode=215 END 
+
+Absolute Immunity	(overhead multi-color disco ball)
+	SPWI907
+	Animation1=~SPABSIMM.vvc~ ~SPABSIMM.bam~
+
+
+
+// Protection from Missiles	(red ioun stone)
+//------------------------------------------
+	spwi311.spl
+	dwsw311.spl
+	overwrite spshield.bam with blank bam. There is no spshield.vvc, it's hardcoded to opcode 156
+	Animation1=~ION1RED.VVC~ ~ION1RED.BAM~
+	Animation2=~ION2RED.VVC~ ~ION1RED.BAM~
+	
+
+		COPY_EXISTING ~spwi311.spl~ ~override~ 
+									~dwsw311.spl~ ~override~ 
+				// delete annoying changes to avatar color
+				LPF DELETE_SPELL_EFFECT	INT_VAR opcode_to_delete=8 END 
+				
+				// Don't delete opcode 156:	"Applies the pfNM cylinder overlay and state to the targeted creature(s)"
+				// We've blanked out spshield.bam, but it's possible something is looking for this scripting state
+				// Highly unlikely though since SCS adds spell state PROTECTION_FROM_NORMAL_MISSILES
+		BUT_ONLY
+		
+
+
+// Non-Detection	(black ioun stone)
+//----------------------------------
+	spwi310.spl
+	dwsw310.spl
+	Animation1=~ION1BLCK.VVC~ ~ION1BLCK.BAM~
+	Animation2=~ION2BLCK.VVC~ ~ION2BLCK.BAM~
+
+
+	COPY_EXISTING ~spwi310.spl~ ~override~
+								~dwsw310.spl~ ~override~ 
+			/*prevent stacking; each one eats a MAGICATTACK*/						
+			LPF ADD_SPELL_EFFECT INT_VAR opcode=321 target=1 insert_point=0 STR_VAR resource=~spwi310~ END 
+			LPF ADD_SPELL_EFFECT INT_VAR opcode=321 target=1 insert_point=0 STR_VAR resource=~dwsw310~ END 
+	
+			// SR is missing defense vs following spells. Intentional? 
+			LPF ADD_SPELL_EFFECT INT_VAR opcode=206	target=2 duration=2400 STR_VAR resource=~SPCL232d~ END // Innate True Sight 
+			LPF ADD_SPELL_EFFECT INT_VAR opcode=206	target=2 duration=2400 STR_VAR resource=~SPWI322~  END // detect illusion
+			LPF ADD_SPELL_EFFECT INT_VAR opcode=206	target=2 duration=2400 STR_VAR resource=~SPPR114~  END // Faerie Fire
+	
+			// Bug: not being removed by MAGICATTACK because power is set to 0.
+			// SR maybe sets it to 0 because it's a friendly single-target spell that can be cast on allies
+			// if ally has MSD/SD/GSD running, it will block friendly single-target spell spells where power>0
+			// normally correct to keep power=0, but in this case MAGICATTACK has to take precedence
+			LPF ALTER_EFFECT INT_VAR power=3 END
+			
+			// set all NON-DISPELLABLE (2) if want to match SI:Divination functionality. Can still dispel underlying invisibility.	
+			// or set all DISPELLABLE (3) to reflect non-detection has 8 hr duration and almost every mage casts it. Default SR *IS* dispellable.
+			
+			LPF ALTER_EFFECT INT_VAR resist_dispel=3 END
+			
+			// absorption feedback
+			LPF ALTER_EFFECT INT_VAR match_opcode=206 parameter1=RESOLVE_STR_REF("Blocked by Non-Detection") END
+	
+
+	// Enemy SCS mages not trying to remove Non-Detection as a SPELLPROTECTIONS, spell states not being set
+	// copy spell states from minor Spell Detection
+	ACTION_FOR_EACH file IN
+	  spwi310 dwsw310
+	BEGIN
+		COPY_EXISTING ~%file%.spl~ ~override~
+			// note insert point; opcode 321 on top removes effects to prevent stacking
+			LPF DK_ADD_SPELL_EFFECT INT_VAR opcode=328 target=2 duration=2400 parameter2=177 power=3 special=1 resist_dispel=3 insert_point="-1" STR_VAR resource=~%file%~ END // pro_spells_level_five_minus
+		
+			LPF DK_ADD_SPELL_EFFECT INT_VAR opcode=328 target=2 duration=2400 parameter2=179 power=3 special=1 resist_dispel=3 insert_point="-1" STR_VAR resource=~%file%~ END // spell_protection
+		
+			LPF DK_ADD_SPELL_EFFECT INT_VAR opcode=328 target=2 duration=2400 parameter2=66 power=3 special=1 resist_dispel=3 insert_point="-1" STR_VAR resource=~%file%~ END // buff_pro_spells
+	END
+
+
+
+// mSD, SD, gSD, Spell Trap, Shield Archons
+//---------------------------------------------
+
+		overwrite spmagglo.bam with blank bam (hardcoded to opcode 201)
+
+		Minor Spell Deflection - white swirl
+		spwi318
+		dwsw318
+		Animation1=~SWIRLW.vvc~  ~SWIRLW.bam~
+		
+		Spell Deflection - medium blue swirl
+		spwi522
+		dwsw522
+		Animation1=~SWIRLB.vvc~   ~SWIRLB.bam~
+		
+		Greater Spell Deflection - yellow gold swirl
+		spwi701
+		dwsw701
+		Animation1=~SWIRLY.vvc~  ~SWIRLY.bam~
+		
+		Spell Trap - purple swirl
+		spwi902.spl
+		dwsw902
+		Animation1=~SWIRLP.vvc~  ~SWIRLP.bam~
+
+		Shield of Archons - teal swirl
+		SPPR701
+		dwsp701
+		Animation1=~SWIRLT.vvc~ ~SWIRLT.bam~
+		*Shield of Archons protects like Spell Trap but is removed like GSD since it's lvl 7, so it gets a unique anim.
+
+
+
+
+// Dispelling Screen (very tranparent disc around feet, AoE spell)
+//---------------------------------------------------------
+	K1#SCRE	(used by dwsw510.spl and spwi510.spl)
+	replace spturni2.bam with blank bam
+	Animation1=~discBlue.vvc~ ~discBlue.bam~
+				
+		/* Fix: Dispelling Screen should be dispelled by Spell Thrust, Secret Word, etc */
+		COPY_EXISTING_REGEXP GLOB ~K1#SCRE.spl~ ~override~  
+			// change secondary type 
+			WRITE_BYTE 0x27 0x01 // to SPELLPROTECTIONS (from K1#DISPEL) so MagicAttack can dispel
+			
+		 	// delete name to suppress log 
+		 	WRITE_LONG 0x08 0 
+		 	
+			// delete refrence to spturni2 (though it's blanked out as well)
+			LPF DELETE_SPELL_EFFECT	INT_VAR opcode_to_delete=215 END 
+		BUT_ONLY
+		
+		
+		// But now Breach & Dispel Magic won't work on DS.
+		// clone every 'Remove Secondary Type=K1#SCRE' with 'Remove Effects from spell=K1#SCRE'
+		// Power must be 0 to bypass Spell Deflection (clone parent should already be 0)
+		COPY_EXISTING_REGEXP GLOB ~[^-]+\.spl~ ~override~  
+			READ_STRREF 0x08 n1 	
+			LPF  DK_CLONE_EFFECT INT_VAR match_opcode=221 match_parameter2=19 opcode=321 parameter1=0 parameter2=0 silent=1 power=0 STR_VAR resource="K1#SCRE" RET mF=new_fx END
+				PATCH_IF %mF%=1 BEGIN
+					PATCH_PRINT ~k1#dispel found in Spell: %SOURCE_FILE% (%n1%)~
+				END
+		BUT_ONLY
+
+		// Fix items that dispel on hit (i.e. quite a few monster weapons)
+		// this DOES work for items deleting secondary k1#dispel, but not items using dvdispel (e.g. ax1h07)
+		COPY_EXISTING_REGEXP GLOB ~[^-]+\.itm~ ~override~  
+			READ_STRREF 0x08 n1 	
+			LPF  DK_CLONE_EFFECT INT_VAR match_opcode=221 match_parameter2=19 opcode=321 parameter1=0 parameter2=0 	silent=1 power=0 STR_VAR resource="K1#SCRE" RET mF=new_fx END
+				PATCH_IF %mF%=1 BEGIN
+					PATCH_PRINT ~k1#dispel found in Item: %SOURCE_FILE% (%n1%)~
+				END
+		BUT_ONLY
+
+
+
+
+// mGoI, GoI
+//---------------------------------------------
+	Minor Globe of Invulnerability
+	*No change except more transparent minorglb.bam
+	~minorglb.vvc~  ~minorglb.bam~ 
+	
+	Globe of Invulnerability (retains minorglb.bam, add peach globe overlay to differentiate from mGoI)
+		spwi602 
+		dwsw602
+		overwrite minorglb.bam with my more transparent version
+		additional Animation1=~myGlobeP.vvc~ ~mGlobeP.bam~
+	
+		
+		
+		
+// Fire Shield Red & Mestil's Acid Sheath
+//---------------------------------------------
+		
+	Fire Shield Red
+	~SPFIREST.vvc~ ~spfiresR.bam~
+	~SPFIRESR.vvc~ ~spfiresR.bam~ (same bam in both vvc)
+		
+	Mestil's Acid Sheath
+	spwi526 dwsw526 (2526 WIZARD_MESTILS_ACID_SHEATH in spell.ids)
+	spwi403 dwsw403 (2403 WIZARD_FIRE_SHIELD_BLUE in spell.ids) // not available to PC's, but still used by enemies
+	in dw#w526a.spl, replace MESTSH.vvc with: 
+	~SPFIRESA.VVC~ spfiresB.bam
+	~SPFIRESB.VVC~ spfiresB.bam (same bam in both vvc)
+		
+	/* Mestil's Acid Sheath spwi526 replace orig green blob with my green fire animation */
+	COPY_EXISTING_REGEXP GLOB ~dw#w526a.spl~ ~override~  
+	  LPF DK_ALTER_EFFECT INT_VAR match_opcode =215	verbose=0 STR_VAR resource=~SPFIRESb~ END // replace MESTSH 
+	  LPF DK_CLONE_EFFECT INT_VAR match_opcode=215 STR_VAR resource=~SPFIRESa~ END
+	BUT_ONLY
+	  
+	
+	//bug fix	
+	//Fire Shield & Acid Sheath need to be SPECIFICPROTECTIONS for Breach to cancel (as intended by SR)
+	COPY_EXISTING ~SPWI418.spl~ ~override~ ~SPWI526.spl~ ~override~ 
+								~DWSW418.spl~ ~override~ ~DWSW526.spl~ ~override~ 	
+		WRITE_BYTE 0x27 0x02 // to SPECIFICPROTECTIONS (from OffensiveDamage) so Breach will eliminate 
+	BUT_ONLY
+	
+	
+	// legacy Fire Shield Blue issue:
+	// SCS sometimes still calls for WIZARD_FIRE_SHIELD_instead of WIZARD_MESTILS_ACID_SHEATH
+	// add 
+	COPY_EXISTING_REGEXP GLOB ~spwi403.spl~ ~override~
+													  ~dwsw403.spl~ ~override~  
+		// classify as Specific Protection or else Breach can't dispel
+		WRITE_BYTE 0x27 0x02 
+		// add green fire_shield_blue 3D effect (2 halves)
+		LPF ADD_SPELL_EFFECT INT_VAR	opcode = 215	target =1 duration=120  parameter2=1 power=5
+			resist_dispel=3	insert_point=8 STR_VAR  resource=~SPFIRESB~	END
+		LPF ADD_SPELL_EFFECT INT_VAR	opcode = 215	target =1 duration=120  parameter2=1 power=5
+			resist_dispel=3	insert_point=9 STR_VAR  resource=~SPFIRESA~	END
+	
+	
+	
+
+// Miscellaneous
+//---------------------------------------------
+
+Spell Shield (blue orb)
+	spwi519
+	dwsw519
+	replace spturni2 with ~MyBluOrb.vvc~ (~myBluOrb.bam~) in DW#W519A.spl
+	*SCS already handles invisibilty animation for Spell Shield via DW#W519A.spl, etc.
+	
+	COPY_EXISTING_REGEXP GLOB ~DW#W519A.spl~ ~override~
+		LPF ALTER_EFFECT 	INT_VAR match_opcode =215	STR_VAR resource=~MYBLUORB~  END 
+	BUT_ONLY
+		
+
+Storm Shield (shimmering gold cage)
+	sppr322
+	spcl721
+	DWSC721
+	Animation1=~myStormS.vvc~ =~myStormS.bam~
+
+
+Mind Blank (gold ioun stone)
+	SPWI802
+	DWSW802
+	Animation1=~ion1Gold.vvc~ ~ion1Gold.bam~
+	Animation2=~ion2Gold.vvc~ ~ion1Gold.bam~
+
+
+
+// Mirror Image
+//---------------------------------------------
+Included in the files is an EEex fix created by modder Bubb on the Beamdog forum. It's a simple update to your Balur.exe that lets you set your mirror image transparency. I find this incredibly useful since I hate the visual on my PC's with 8 opaque mirror images.
+
+The mod will prompt you for a transparency from 1 (fully visible) to 100 (invisible) IIRC and don't have this reversed. There's a problem where values less than 50 do not seem to work at all, but values >=51 work. We'd have to ask Bubb if this could be fixed, but the 51% option is great as is.
+
+
+
+
+/**********************************************************
+'Varying Color Glows & Pulses' 
+**********************************************************/
+
+
+Color pulses are far more limited than animations since they don't visually stack. A Silence glow will visually override a Blindess glow, and vice versa. But they're a handy visual clue for certain disabling effects where you can live with the risk of stacking. Note there's no alternative to using Full Body (location 255) if you're going to apply this to monsters as well as humans.
+
+I slightly prefer opcode 8 (static glow) to opocde 9 (pulse glow) because the former can be a little easier to detect in a chaotic combat. But opcode 9 has the advantage that, by very slightly varying the pulse speed, you can uniquely identify each different pulse with opcode 337 Remove Effect.
+
+e.g.	Silence, moderate speed full body pulse, 0x002800ff 
+			Blindness, moderate speed full body pulse, 0x002700ff
+			
+Then in Vocalize, you can remove the Silence glow effect without removing the Blindness glow (or any other glow like Chant, or whatever). 
+
+COPY_EXISTING ~spwi219.spl~ ~override~ 
+	LPF DK_CLONE_EFFECT INT_VAR match_opcode=48 opcode=337 parameter1=0x002800ff parameter2=9 END
+
+
+This is useful since some spells apply Blindness along with other effects. If you're using (e.g.) SR's Cure Disease to remove Blindness, you don't want to remove all spell effects with opcode #321 'Remove Effects specified by Resource'. You just want to remove the blindess effects.
