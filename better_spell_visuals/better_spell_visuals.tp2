@@ -27,67 +27,9 @@ REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~dvsrv4here.mrk~) @1
 
 COPY_EXISTING ~sw1h04.itm~ ~override/d5__spl_visuals.d5~ // detection for this component 
 
+INCLUDE ~better_spell_visuals/comp/spell_defense_visuals.tpa~
 
-/*
-***** look for cloned versions... probably only done by FnP
-
-***** also look out for items - e.g. some IR stuff casts fire shield, some stuff applies nondetection, etc.
-
-1) zero out hardcoded animations - replace:
- - spturni2.bam
- - spmagglo.bam
- - spshield.bam.
-
-2) remove ioun stone animnations
- - copy helm18.itm
- - read name strref
- - read string from the strref
- - find any items with the same name strref or whose name matches the string
- - delete any 215 effects with timing 2
- 
-3) add mybulbgr vvc and bam (renamed) to PfNW
-
-4) add spcomett vvc and bam (renamed) to PfMW
-
-5) add modified dvmantle to prismatic mantle (unless SDRT)
-
-6) add myimpman vvc and bam (renamed) to moment of prescience and delete existing 215 effect
-
-7) add spabsimm vvc and bam (renamed) to absolute immunity
-
-8) add ion1red & ion2red vvc and bam (renamed) to Pro Missiles
-
-9) add ion1blck & ion2blck vvc and bam (renamed) to Pro Missiles
-
-10) add swirlw vvc and bam (renamed) to MSD
-
-11) add swirlb vvc and bam (renamed) to SD
-
-12) add swirly vvc and bam (renamed) to GSD
-
-13) add swirlp vvc and bam (renamed) to Spell Trap
-
-14) add swirlt vvc and bam (renamed) to Shield of the Archons
-
-15) add discblue vvc aand bam (renamed) to k1#scre
-
-16) overwrite minorglb vvc and bam in MGOI
-
-17) replace minorglb with myglobep vvc and bam (renamed) in GOI
-
-18) add spfirest/spfiresr vvc and spfiresr bam (renamed) to fire shield red
-
-19) replace mestsh.vvc with spfiresa/spfiresb vvc and spfiresb bam (renamed) in spwi526, dwsw526, spwi403, dwsw403, dw#w526a
-
-20) replace spturni2 with myblueorb vvc and bam (renamed) in spwi519, dwsw519, dw#w519a
-
-21) add mystorms vvc and bam (renamed) in sppr322, spcl721, dwsc721
-
-22) add ion1gold/ion2gold vvc and ion1gold bam (renamed) to mind blank
-
-*/
-
-
+LAF better_visuals END
 
 /*
 // ------------------------------------------------------------------------
@@ -97,10 +39,13 @@ BEGIN ~Varying Color Glows and Pulses~
 DESIGNATED 20
 REQUIRE_PREDICATE (GAME_IS ~bgee bg2ee iwdee eet~) @1
 
+INCLUDE ~better_spell_visuals/comp/glows_and_pulses.tpa~
+
+LAF glows_pulses END
 
 */
 
-/*
+
 // ------------------------------------------------------------------------
 // ------------------------------------------------------------------------
 //
@@ -109,13 +54,19 @@ SUBCOMPONENT ~Bubb's Improved Mirror Image Transparency~
 DESIGNATED 31
 REQUIRE_PREDICATE (GAME_IS ~bgee bg2ee iwdee eet~) @1
 
+INCLUDE ~better_spell_visuals/comp/bubb_mirror_image_transparency.tpa~
+
+LAF mi_transparency INT_VAR chosen_transparency = 60 END
+
 // ------------------------------------------------------------------------
 
 BEGIN ~85% transparency~
 SUBCOMPONENT ~Bubb's Improved Mirror Image Transparency~
 DESIGNATED 32
 
-*/
+INCLUDE ~better_spell_visuals/comp/bubb_mirror_image_transparency.tpa~
+
+LAF mi_transparency INT_VAR chosen_transparency = 85 END
 
 
 /*

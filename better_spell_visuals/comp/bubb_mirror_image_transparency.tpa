@@ -1,0 +1,30 @@
+//__________________________________________________________________________________
+//__________________________________________________________________________________
+//
+//								MIRROR IMAGE TRANSPARENCY
+//__________________________________________________________________________________
+//__________________________________________________________________________________
+
+
+DEFINE_ACTION_FUNCTION mi_transparency INT_VAR chosen_transparency = 85 BEGIN
+
+
+ACTION_IF GAME_IS ~bgee bg2ee eet~ BEGIN
+	OUTER_SPRINT exe_name ~Baldur.exe~
+END ELSE ACTION_IF GAME_IS ~iwdee~ BEGIN
+	OUTER_SPRINT exe_name ~icewind.exe~
+END ELSE BEGIN
+	FAIL ~exe_name not defined for game; (logic error, report to @Bubb).~
+END
+
+OUTER_SET transparency_byte = 255 * %chosen_transparency% / 100
+
+COPY ~%exe_name%~ ~%exe_name%~
+	mirror_image_transparency = INDEX_BUFFER (EXACT_MATCH ~j`ÿw~)
+	PATCH_IF mirror_image_transparency == (0 - 1) BEGIN
+		PATCH_FAIL ~Couldn't find mirror_image_transparency; most likely you are trying to install on a future version.~
+	END
+	WRITE_BYTE mirror_image_transparency + 1 transparency_byte
+IF_EXISTS
+
+END	//	end function
